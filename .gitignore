@@ -38,6 +38,10 @@ wheels/
 data/
 datasets/
 
+# Model files
+models/*.pkl
+*.pkl
+
 # IDE
 .vscode/
 .idea/
