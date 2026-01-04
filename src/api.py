@@ -54,7 +54,7 @@ async def lifespan(app: FastAPI):
 # ----- Input & Output validation -----
 
 class TransactionInput(BaseModel):
-    """Input schema: 30 features (V1-V28 + Amount)"""
+    """Input schema: 29 features (V1-V28 + Amount)"""
     
     V1: float
     V2: float
@@ -100,19 +100,7 @@ class PredictionResponse(BaseModel):
     prediction: int  # 0 or 1
     probability: float  # 0.0 to 1.0
     threshold: float
-    FRAUD_MODEL_VERSION: str
-
-    @field_validator('prediction', mode="before")
-    def binary_prediction(cls, v):
-        if v not in [0, 1]:
-            raise ValueError("Prediction must be binary (0 or 1)")
-    
-    @field_validator('probability', mode="before")
-    def valid_probability(cls, v):
-        if v < 0:
-            raise ValueError(f"Invalid probability value ({v}); probability must be between 0 and 1")
-        if v > 1:
-            raise ValueError(f"Invalid probability value ({v}); probability must be between 0 and 1")
+    fraud_model_version: str
         
 
 # ----- Initialise the API -----
@@ -132,7 +120,7 @@ async def root():
     """Health check endpoint"""
     return {
         "status": "healthy",
-        "FRAUD_MODEL_VERSION": FRAUD_MODEL_VERSION,
+        "fraud_model_version": FRAUD_MODEL_VERSION,
         "threshold": DEFAULT_THRESHOLD
     }
 
@@ -146,25 +134,25 @@ async def predict(transaction: TransactionInput):
         prediction: 0 (legitimate) or 1 (fraud)
         probability: fraud probability (0.0 to 1.0)
         threshold: classification threshold used
-        FRAUD_MODEL_VERSION: model version identifier
+        fraud_model_version: model version identifier
     """
     
     # Rescale Amount
-    scaled_amount = scaler.transform([transaction.Amount])
+    scaled_amount = scaler.transform([[transaction.Amount]])[0][0]
 
     # Prepare featureset
-    features = [[getattr(transaction, f"V{i}")] for i in range(1, 29)]
+    features = [getattr(transaction, f"V{i}") for i in range(1, 29)]
     features.append(scaled_amount)
 
     # Run model to compute probability of fraud
-    fraud_probability = model.predict_proba(features)[0][1]
+    fraud_probability = model.predict_proba([features])[0][1]
+    prediction = 1 if fraud_probability >= DEFAULT_THRESHOLD else 0
 
-    
     return {
-        "prediction": 1 if fraud_probability >= DEFAULT_THRESHOLD else 0,
+        "prediction": prediction,
         "probability": fraud_probability,
         "threshold": DEFAULT_THRESHOLD,
-        "FRAUD_MODEL_VERSION": FRAUD_MODEL_VERSION,
+        "fraud_model_version": FRAUD_MODEL_VERSION,
     }
 
 
