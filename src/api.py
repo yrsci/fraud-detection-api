@@ -11,6 +11,7 @@ API Design Decisions:
 
 from fastapi import FastAPI
 from pydantic import BaseModel, validator
+import numpy as np
 import pickle
 from contextlib import asynccontextmanager
 import os
@@ -47,7 +48,6 @@ async def lifespan(app: FastAPI):
     
     # Cleanup (if needed)
     print("Shutting down...")
-
 
 
 # ----- Input & Output validation -----
@@ -113,3 +113,55 @@ class PredictionResponse(BaseModel):
         if v > 1:
             raise ValueError(f"Invalid probability value ({v}); probability must be between 0 and 1")
         
+
+# ----- Initialise the API -----
+
+app = FastAPI(
+    title="Fraud Detection API",
+    description="Credit card fraud detection using Logistic Regression",
+    version=MODEL_VERSION,
+    lifespan=lifespan
+)
+
+
+# ----- Endpoints -----
+
+@app.get("/")
+async def root():
+    """Health check endpoint"""
+    return {
+        "status": "healthy",
+        "model_version": MODEL_VERSION,
+        "threshold": DEFAULT_THRESHOLD
+    }
+
+
+@app.post("/predict", response_model=PredictionResponse)
+async def predict(transaction: TransactionInput):
+    """
+    Predict fraud probability for a transaction
+    
+    Returns:
+        prediction: 0 (legitimate) or 1 (fraud)
+        probability: fraud probability (0.0 to 1.0)
+        threshold: classification threshold used
+        model_version: model version identifier
+    """
+    
+    # Rescale Amount
+    scaled_amount = scaler.transform([transaction.Amount])
+
+    # Prepare featureset
+    features = [[getattr(transaction, f"V{i}")] for i in range(1, 29)]
+    features.append(scaled_amount)
+
+    # Run model to get probability of fraud
+    fraud_probability = model.predict_proba(features)[0][1]
+
+    
+    return {
+        "prediction": 1 if probabilities >= DEFAULT_THRESHOLD else 0,  # 0 or 1
+        "probability": probabilities,  # 0.0 to 1.0
+        "threshold": DEFAULT_THRESHOLD,
+        "model_version": MODEL_VERSION,
+    }
