@@ -15,6 +15,7 @@ import numpy as np
 import pickle
 from contextlib import asynccontextmanager
 import os
+import uvicorn
 
 
 # ----- Configuration -----
@@ -165,3 +166,9 @@ async def predict(transaction: TransactionInput):
         "threshold": DEFAULT_THRESHOLD,
         "FRAUD_MODEL_VERSION": FRAUD_MODEL_VERSION,
     }
+
+
+# ----- Start the server -----
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8000)
