@@ -19,10 +19,10 @@ import os
 
 # ----- Configuration -----
 
-MODEL_PATH = "../models/fraud_model.pkl"
-SCALER_PATH = "../models/amount_scaler.pkl"
+FRAUD_MODEL_PATH = "models/fraud_model.pkl"
+SCALER_PATH = "models/amount_scaler.pkl"
 DEFAULT_THRESHOLD = float(os.getenv("FRAUD_THRESHOLD", "0.5")) # lets me adjust the threshold without changing a value in the code
-MODEL_VERSION = "v1.0"
+FRAUD_MODEL_VERSION = "v1.0"
 
 
 # ----- Global state (load on startup) -----
@@ -38,10 +38,10 @@ async def lifespan(app: FastAPI):
     """Load model and scaler on startup, cleanup on shutdown"""
     global model, scaler
     
-    model = pickle.load(open(MODEL_PATH, 'rb'))
+    model = pickle.load(open(FRAUD_MODEL_PATH, 'rb'))
     scaler = pickle.load(open(SCALER_PATH, 'rb'))
     
-    print(f"Model loaded: {MODEL_VERSION}")
+    print(f"Model loaded: {FRAUD_MODEL_VERSION}")
     print(f"Threshold: {DEFAULT_THRESHOLD}")
     
     yield  # API runs here
@@ -99,7 +99,7 @@ class PredictionResponse(BaseModel):
     prediction: int  # 0 or 1
     probability: float  # 0.0 to 1.0
     threshold: float
-    model_version: str
+    FRAUD_MODEL_VERSION: str
 
     @field_validator('prediction', mode="before")
     def binary_prediction(cls, v):
@@ -119,7 +119,7 @@ class PredictionResponse(BaseModel):
 app = FastAPI(
     title="Fraud Detection API",
     description="Credit card fraud detection using Logistic Regression",
-    version=MODEL_VERSION,
+    version=FRAUD_MODEL_VERSION,
     lifespan=lifespan
 )
 
@@ -131,7 +131,7 @@ async def root():
     """Health check endpoint"""
     return {
         "status": "healthy",
-        "model_version": MODEL_VERSION,
+        "FRAUD_MODEL_VERSION": FRAUD_MODEL_VERSION,
         "threshold": DEFAULT_THRESHOLD
     }
 
@@ -145,7 +145,7 @@ async def predict(transaction: TransactionInput):
         prediction: 0 (legitimate) or 1 (fraud)
         probability: fraud probability (0.0 to 1.0)
         threshold: classification threshold used
-        model_version: model version identifier
+        FRAUD_MODEL_VERSION: model version identifier
     """
     
     # Rescale Amount
@@ -163,5 +163,5 @@ async def predict(transaction: TransactionInput):
         "prediction": 1 if fraud_probability >= DEFAULT_THRESHOLD else 0,
         "probability": fraud_probability,
         "threshold": DEFAULT_THRESHOLD,
-        "model_version": MODEL_VERSION,
+        "FRAUD_MODEL_VERSION": FRAUD_MODEL_VERSION,
     }
