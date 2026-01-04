@@ -9,7 +9,45 @@ API Design Decisions:
 6. Threshold: Default 0.5, configurable via environment variable
 """
 
+from fastapi import FastAPI
 from pydantic import BaseModel, validator
+import pickle
+from contextlib import asynccontextmanager
+import os
+
+
+# ----- Configuration -----
+
+MODEL_PATH = "../models/fraud_model.pkl"
+SCALER_PATH = "../models/amount_scaler.pkl"
+DEFAULT_THRESHOLD = float(os.getenv("FRAUD_THRESHOLD", "0.5")) # lets me adjust the threshold without changing a value in the code
+MODEL_VERSION = "v1.0"
+
+
+# ----- Global state (load on startup) -----
+
+model = None
+scaler = None
+
+
+# ----- Startup & Shutdown -----
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Load model and scaler on startup, cleanup on shutdown"""
+    global model, scaler
+    
+    model = pickle.load(open(MODEL_PATH, 'rb'))
+    scaler = pickle.load(open(SCALER_PATH, 'rb'))
+    
+    print(f"Model loaded: {MODEL_VERSION}")
+    print(f"Threshold: {DEFAULT_THRESHOLD}")
+    
+    yield  # API runs here
+    
+    # Cleanup (if needed)
+    print("Shutting down...")
+
 
 
 # ----- Input & Output validation -----
