@@ -10,7 +10,7 @@ API Design Decisions:
 """
 
 from fastapi import FastAPI
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, field_validator
 import numpy as np
 import pickle
 from contextlib import asynccontextmanager
@@ -85,7 +85,7 @@ class TransactionInput(BaseModel):
     V28: float
     Amount: float
     
-    @validator('Amount')
+    @field_validator("Amount", mode="before")
     def amount_must_be_positive(cls, v):
         """Validate Amount is non-negative"""
         if v < 0:
@@ -101,12 +101,12 @@ class PredictionResponse(BaseModel):
     threshold: float
     model_version: str
 
-    @validator('prediction')
+    @field_validator('prediction', mode="before")
     def binary_prediction(cls, v):
         if v not in [0, 1]:
             raise ValueError("Prediction must be binary (0 or 1)")
     
-    @validator('probability')
+    @field_validator('probability', mode="before")
     def valid_probability(cls, v):
         if v < 0:
             raise ValueError(f"Invalid probability value ({v}); probability must be between 0 and 1")
@@ -155,13 +155,13 @@ async def predict(transaction: TransactionInput):
     features = [[getattr(transaction, f"V{i}")] for i in range(1, 29)]
     features.append(scaled_amount)
 
-    # Run model to get probability of fraud
+    # Run model to compute probability of fraud
     fraud_probability = model.predict_proba(features)[0][1]
 
     
     return {
-        "prediction": 1 if probabilities >= DEFAULT_THRESHOLD else 0,  # 0 or 1
-        "probability": probabilities,  # 0.0 to 1.0
+        "prediction": 1 if fraud_probability >= DEFAULT_THRESHOLD else 0,
+        "probability": fraud_probability,
         "threshold": DEFAULT_THRESHOLD,
         "model_version": MODEL_VERSION,
     }
