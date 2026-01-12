@@ -18,12 +18,11 @@ To test the API:
 curl http://localhost:8000/
 ```
 
-Make a prediction:
-Fraudulent transaction:
+Make a prediction: Fraudulent transaction
 ```bash
 curl -X POST http://localhost:8000/predict -H "Content-Type: application/json" -d @example_fraud_transaction.json
 ```
-Non-fraudulent transaction:
+Make a prediction: Non-fraudulent transaction
 ```bash
 curl -X POST http://localhost:8000/predict -H "Content-Type: application/json" -d @example_nonfraud_transaction.json
 ```
