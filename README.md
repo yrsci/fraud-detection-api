@@ -6,16 +6,22 @@ Using:
 - scikit-learn to preprocess data, train a model & generate predictions
 - pytest to implement a simple suite of tests
 - FastAPI to build a basic API
+- Docker for containerisation
 - Mermaid to illustrate the architecture and request flow
 
 
 ## Dataset 
 Dataset provided by MGL-ULB under the [Database Contents License (DbCL)](https://opendatacommons.org/licenses/dbcl/1-0/) and sourced from [kaggle.com](https://www.kaggle.com/datasets/mlg-ulb/creditcardfraud).
 
-To download it via your CLI and unzip for use with this project, run the following from within the repository after cloning:
+To download it via your CLI, run the following snippet:
 
 ```bash
 kaggle datasets download -d mlg-ulb/creditcardfraud
+```
+
+To unzip for use with this project, run the following from within the repository after cloning:
+
+```bash
 mkdir -p data && unzip creditcardfraud.zip -d data/
 ```
 
