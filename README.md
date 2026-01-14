@@ -130,11 +130,11 @@ curl http://localhost:8000/
 
 Make a prediction: sample fraudulent transaction
 ```bash
-curl -X POST http://localhost:8000/predict -H "Content-Type: application/json" -d @example_fraud_transaction.json
+curl -X POST http://localhost:8000/predict -H "Content-Type: application/json" -d @tests/example_fraud_transaction.json
 ```
 Make a prediction: sample non-fraudulent transaction
 ```bash
-curl -X POST http://localhost:8000/predict -H "Content-Type: application/json" -d @example_nonfraud_transaction.json
+curl -X POST http://localhost:8000/predict -H "Content-Type: application/json" -d @tests/example_nonfraud_transaction.json
 ```
 
 
