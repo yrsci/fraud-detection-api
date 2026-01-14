@@ -11,7 +11,6 @@ API Design Decisions:
 
 from fastapi import FastAPI
 from pydantic import BaseModel, field_validator
-import numpy as np
 import pandas as pd
 import pickle
 from contextlib import asynccontextmanager

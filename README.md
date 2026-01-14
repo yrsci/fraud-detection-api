@@ -32,6 +32,28 @@ The dataset contains:
 - Binary target: Class (0=legitimate, 1=fraud)
 
 
+## Project Structure
+
+fraud-detection-api/
+├── data/
+│   └── creditcard.csv          # Training data (not in repo)
+├── models/
+│   ├── fraud_model.pkl         # Trained model (not in repo)
+│   └── amount_scaler.pkl       # Feature scaler (not in repo)
+├── notebooks/
+│   ├── 00_eda.ipynb            # Exploratory data analysis
+│   └── 01_model_training.ipynb # Model training & evaluation
+├── src/
+│   └── api.py                  # FastAPI application
+├── tests/
+│   └── test_api.py             # API tests (pytest)
+│   └── example_fraud_transaction.json     # Sample fraud transaction to test API with
+│   └── example_nonfraud_transaction.json  # Sample non-fraud transaction to test API with
+├── dockerfile                  # Container definition
+├── requirements.txt            # Python dependencies
+└── README.md                   # Documentation
+
+
 ## Architecture
 
 ```mermaid
