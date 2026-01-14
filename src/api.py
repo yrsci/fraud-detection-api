@@ -12,6 +12,7 @@ API Design Decisions:
 from fastapi import FastAPI
 from pydantic import BaseModel, field_validator
 import numpy as np
+import pandas as pd
 import pickle
 from contextlib import asynccontextmanager
 import os
@@ -131,14 +132,19 @@ async def predict(transaction: TransactionInput):
     """
 
     # Rescale Amount
-    scaled_amount = scaler.transform([[transaction.Amount]])[0][0]
+    amount_df = pd.DataFrame([[transaction.Amount]], columns=["Amount"])
+    scaled_amount = scaler.transform(amount_df)[0][0]
 
     # Prepare featureset
     features = [getattr(transaction, f"V{i}") for i in range(1, 29)]
     features.append(scaled_amount)
 
+    # Convert to numpy array with feature names
+    feature_names = [f"V{i}" for i in range(1, 29)] + ["Amount_scaled"]
+    features_df = pd.DataFrame([features], columns=feature_names)
+
     # Run model to compute probability of fraud
-    fraud_probability = model.predict_proba([features])[0][1]
+    fraud_probability = model.predict_proba(features_df)[0][1]
     prediction = 1 if fraud_probability >= DEFAULT_THRESHOLD else 0
 
     return {
