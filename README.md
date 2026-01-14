@@ -1,6 +1,7 @@
 # fraud-detection-api
 Building a simple end-to-end fraud detection model pipeline to demonstrate key skills.
 
+
 ## Running with Docker
 
 To build the image, run:
@@ -26,3 +27,20 @@ Make a prediction: Non-fraudulent transaction
 ```bash
 curl -X POST http://localhost:8000/predict -H "Content-Type: application/json" -d @example_nonfraud_transaction.json
 ```
+
+
+## Running Tests
+```bash
+# Run all tests
+python -m pytest tests/ -v
+
+# Run with output (see print statements)
+python -m pytest tests/ -v -s
+```
+
+### Test Coverage
+
+- Input validation (negative amounts, missing features)
+- API response format and types
+- Health check endpoint
+- End-to-end prediction flow
