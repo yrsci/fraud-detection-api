@@ -38,6 +38,14 @@ wheels/
 data/
 datasets/
 
+# Allow example files
+!example_fraud_transaction.json
+!example_nonfraud_transaction.json
+
+# Model files
+models/*.pkl
+*.pkl
+
 # IDE
 .vscode/
 .idea/
