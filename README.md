@@ -34,6 +34,7 @@ The dataset contains:
 
 ## Project Structure
 
+```
 fraud-detection-api/
 ├── data/
 │   └── creditcard.csv          # Training data (not in repo)
@@ -52,6 +53,7 @@ fraud-detection-api/
 ├── dockerfile                  # Container definition
 ├── requirements.txt            # Python dependencies
 └── README.md                   # Documentation
+```
 
 
 ## Architecture
