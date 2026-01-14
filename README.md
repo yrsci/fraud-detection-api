@@ -51,10 +51,7 @@ graph TB
     USER --> |GET /| FASTAPI
     FASTAPI --> |Health Status| USER
     
-    style MODEL fill:#e1f5ff
-    style SCALER fill:#e1f5ff
-    style FASTAPI fill:#fff4e1
-    style NB fill:#f0f0f0
+
 ```
 
 ## Request Flow
@@ -77,7 +74,7 @@ sequenceDiagram
     Pydantic->>FastAPI: Valid TransactionInput
     FastAPI->>Scaler: Transform Amount feature
     Scaler->>FastAPI: Scaled amount
-    FastAPI->>FastAPI: Prepare feature array (V1-V28 + Amount)
+    FastAPI->>FastAPI: Prepare feature array (V1-V28 + Amount_scaled)
     FastAPI->>Model: predict_proba(features)
     Model->>FastAPI: Fraud probability [0.0-1.0]
     FastAPI->>FastAPI: Apply threshold (default 0.5)
