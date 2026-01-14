@@ -16,20 +16,16 @@ import pickle
 from contextlib import asynccontextmanager
 import os
 import uvicorn
+from pathlib import Path
 
 
 # ----- Configuration -----
 
-FRAUD_MODEL_PATH = "models/fraud_model.pkl"
-SCALER_PATH = "models/amount_scaler.pkl"
+BASE_DIR = Path(__file__).parent.parent
+FRAUD_MODEL_PATH = BASE_DIR / "models" / "fraud_model.pkl"
+SCALER_PATH = BASE_DIR / "models" / "amount_scaler.pkl"
 DEFAULT_THRESHOLD = float(os.getenv("FRAUD_THRESHOLD", "0.5")) # lets me adjust the threshold without changing a value in the code
 FRAUD_MODEL_VERSION = "v1.0"
-
-
-# ----- Global state (load on startup) -----
-
-model = None
-scaler = None
 
 
 # ----- Startup & Shutdown -----
@@ -38,16 +34,13 @@ scaler = None
 async def lifespan(app: FastAPI):
     """Load model and scaler on startup, cleanup on shutdown"""
     global model, scaler
-    
-    model = pickle.load(open(FRAUD_MODEL_PATH, 'rb'))
-    scaler = pickle.load(open(SCALER_PATH, 'rb'))
-    
+    with open(FRAUD_MODEL_PATH, 'rb') as f:
+        model = pickle.load(f)
+    with open(SCALER_PATH, 'rb') as f:
+        scaler = pickle.load(f)
     print(f"Model loaded: {FRAUD_MODEL_VERSION}")
     print(f"Threshold: {DEFAULT_THRESHOLD}")
-    
     yield  # API runs here
-    
-    # Cleanup (if needed)
     print("Shutting down...")
 
 
@@ -136,7 +129,7 @@ async def predict(transaction: TransactionInput):
         threshold: classification threshold used
         fraud_model_version: model version identifier
     """
-    
+
     # Rescale Amount
     scaled_amount = scaler.transform([[transaction.Amount]])[0][0]
 
